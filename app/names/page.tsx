@@ -202,7 +202,7 @@ function NameSearchContent() {
         >
           <span>切换到</span>
           <span className={gender === 'male' ? 'text-pink-500' : 'text-blue-500'}>
-            {gender === 'male' ? '���孩名' : '男孩名'}
+            {gender === 'male' ? '女孩名' : '男孩名'}
           </span>
         </button>
       )}
