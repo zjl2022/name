@@ -1,15 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 
+// 添加 NameDetail 接口定义
 interface NameDetail {
-  name: string;
   content: string;
-  score: number;
+  // 根据实际数据添加其他必要的字段
 }
 
-export default function NameDetailPage() {
+// 创建一个新的组件来包含使用 useSearchParams 的内容
+function NameDetailContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [detail, setDetail] = useState<NameDetail | null>(null);
@@ -271,3 +272,12 @@ export default function NameDetailPage() {
   
   );
 } 
+
+// 添加默认导出的页面组件
+export default function NameDetailPage() {
+  return (
+    <Suspense fallback={<div>加载中...</div>}>
+      <NameDetailContent />
+    </Suspense>
+  );
+}

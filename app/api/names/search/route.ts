@@ -4,11 +4,13 @@ import { MONGODB_URI, MONGODB_DB } from '@/lib/db';
 
 const client = new MongoClient(MONGODB_URI);
 
-type SearchParams = {
-  query: string;
-  page?: number;
-  // 添加其他需要的属性
-};
+// 添加接口定义
+interface MatchStage {
+  name?: RegExp;
+  $or?: Array<{
+    gender_suitability: string;
+  }>;
+}
 
 export async function GET(request: Request) {
   try {
@@ -22,8 +24,8 @@ export async function GET(request: Request) {
     const db = client.db(MONGODB_DB);
     const collection = db.collection('names');
 
-    // 构建查询条件
-    const matchStage: any = {};
+    // 修改 matchStage 的类型声明
+    const matchStage: MatchStage = {};
     
     if (containChar) {
       matchStage.name = new RegExp(containChar);
@@ -83,7 +85,7 @@ export async function GET(request: Request) {
     });
 
   } catch (error) {
-    console.error('Search error:', error);
+    console.error('搜索名字时出错:', error);
     return NextResponse.json(
       { success: false, error: '搜索失败，请稍后重试' },
       { status: 500 }

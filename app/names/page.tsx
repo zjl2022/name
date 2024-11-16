@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 
@@ -20,7 +20,8 @@ interface CharacterInfo {
   name_reference: string;
 }
 
-export default function NamesListPage() {
+// 创建一个新的组件来包含使用 useSearchParams 的部分
+function NameSearchContent() {
   const [names, setNames] = useState<NameData[]>([]);
   const [characterInfos, setCharacterInfos] = useState<Record<string, CharacterInfo>>({});
   const [loading, setLoading] = useState(false);
@@ -75,7 +76,7 @@ export default function NamesListPage() {
         setNames(data);
 
         // 获取所有需要的汉字信息
-        const chars = new Set([lastName, ...data.flatMap(n => n.name.split(''))]);
+        const chars = new Set([lastName, ...data.flatMap((n: NameData) => n.name.split(''))]);
         const charInfos: Record<string, CharacterInfo> = {};
         
         console.log('需要获取信息的汉字:', [...chars]);
@@ -123,27 +124,27 @@ export default function NamesListPage() {
   );
 
   // 新增 CharacterInfo 组件
-  const CharacterInfo = ({ char }: { char: string }) => {
-    const info = characterInfos[char];
-    console.log(`渲染 "${char}" 的信息:`, info);
-    
-    return (
-      <div className="text-sm space-y-1.5 bg-gray-50 p-2 rounded">
-        <div className="flex items-center gap-2">
-          <span className="w-14 text-gray-500">笔画：</span>
-          <span>{info?.strokes || '未知'}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="w-14 text-gray-500">五行：</span>
-          <span>{info?.five_elements || '未知'}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="w-14 text-gray-500">拼音：</span>
-          <span>{info?.pinyin || '未知'}</span>
-        </div>
-      </div>
-    );
-  };
+  // const CharacterInfo = ({ char }: { char: string }) => {
+  //   const info = characterInfos[char];
+  //   console.log(`渲染 "${char}" 的信息:`, info);
+  //   
+  //   return (
+  //     <div className="text-sm space-y-1.5 bg-gray-50 p-2 rounded">
+  //       <div className="flex items-center gap-2">
+  //         <span className="w-14 text-gray-500">笔画：</span>
+  //         <span>{info?.strokes || '未知'}</span>
+  //       </div>
+  //       <div className="flex items-center gap-2">
+  //         <span className="w-14 text-gray-500">五行：</span>
+  //         <span>{info?.five_elements || '未知'}</span>
+  //       </div>
+  //       <div className="flex items-center gap-2">
+  //         <span className="w-14 text-gray-500">拼音：</span>
+  //         <span>{info?.pinyin || '未知'}</span>
+  //       </div>
+  //     </div>
+  //   );
+  // };
 
   // 修改 handleCharacterClick 函数，确保总是从第一页开始
   const handleCharacterClick = (char: string) => {
@@ -201,7 +202,7 @@ export default function NamesListPage() {
         >
           <span>切换到</span>
           <span className={gender === 'male' ? 'text-pink-500' : 'text-blue-500'}>
-            {gender === 'male' ? '女孩名' : '男孩名'}
+            {gender === 'male' ? '���孩名' : '男孩名'}
           </span>
         </button>
       )}
@@ -326,5 +327,14 @@ export default function NamesListPage() {
         </Button>
       </div>
     </div>
+  );
+}
+
+// 主页面组件
+export default function NamesPage() {
+  return (
+    <Suspense fallback={<div>加载中...</div>}>
+      <NameSearchContent />
+    </Suspense>
   );
 }
