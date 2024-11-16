@@ -34,9 +34,6 @@ export async function GET(request: Request) {
 
     // 如果还是没找到，打印一下集合中的部分数据，帮助调试
     if (!nameDetail) {
-      const sampleDocs = await collection.find({}).limit(5).toArray();
-
-      
       return NextResponse.json({
         success: false,
         message: '未找到名字信息'

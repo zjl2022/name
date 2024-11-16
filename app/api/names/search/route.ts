@@ -4,6 +4,12 @@ import { MONGODB_URI, MONGODB_DB } from '@/lib/db';
 
 const client = new MongoClient(MONGODB_URI);
 
+type SearchParams = {
+  query: string;
+  page?: number;
+  // 添加其他需要的属性
+};
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
