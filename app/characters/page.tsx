@@ -12,14 +12,20 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 
+// 定义字符数据的接口
+interface Character {
+  character: string;
+  gender_preference?: '男' | '女';
+  usage_count: number;
+}
+
 export default function CharactersList() {
   const router = useRouter();
-  const [characters, setCharacters] = useState<any[]>([]);
+  const [characters, setCharacters] = useState<Character[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [selectedChar, setSelectedChar] = useState('');
   const [lastName, setLastName] = useState(() => {
-    // 从 localStorage 获取上次保存的姓氏
     if (typeof window !== 'undefined') {
       return localStorage.getItem('lastName') || '';
     }
@@ -28,17 +34,6 @@ export default function CharactersList() {
   const [gender, setGender] = useState<'all' | 'male' | 'female'>('all');
   const [isLoading, setIsLoading] = useState(false);
   const pageSize = 100;
-
-  useEffect(() => {
-    fetchCharacters();
-  }, [currentPage, gender]);
-
-  // 保存姓氏到 localStorage
-  useEffect(() => {
-    if (lastName) {
-      localStorage.setItem('lastName', lastName);
-    }
-  }, [lastName]);
 
   const fetchCharacters = async () => {
     setIsLoading(true);
@@ -56,12 +51,20 @@ export default function CharactersList() {
     }
   };
 
+  useEffect(() => {
+    fetchCharacters();
+  }, [currentPage, gender, pageSize]);
+
+  useEffect(() => {
+    if (lastName) {
+      localStorage.setItem('lastName', lastName);
+    }
+  }, [lastName]);
+
   const handleCharacterClick = (char: string) => {
     if (lastName) {
-      // 如果已有姓氏，直接跳转
       router.push(`/names?lastName=${lastName}&containChar=${char}`);
     } else {
-      // 否则打开对话框要求输入姓氏
       setSelectedChar(char);
     }
   };
