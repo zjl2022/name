@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 
-import { Input } from "@/components/ui/input";
+
 
 // 定义字符数据的接口
 interface Character {
@@ -22,7 +22,7 @@ export default function CharactersList() {
   const [isLoading, setIsLoading] = useState(false);
   const pageSize = 100;
 
-  const fetchCharacters = async () => {
+  const fetchCharacters = useCallback(async () => {
     setIsLoading(true);
     try {
       const response = await fetch(`/api/zi/list?page=${currentPage}&pageSize=${pageSize}&gender=${gender}`);
@@ -36,11 +36,11 @@ export default function CharactersList() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [currentPage, gender, pageSize]);
 
   useEffect(() => {
     fetchCharacters();
-  }, [currentPage, gender, pageSize]);
+  }, [fetchCharacters]);
 
   const handleCharacterClick = (char: string) => {
     router.push(`/names?containChar=${char}`);
