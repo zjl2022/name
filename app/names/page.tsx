@@ -178,7 +178,11 @@ function NameSearchContent() {
       {/* 原有的列表内容 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {names.map((nameData, index) => {
-          const chars = nameData.name.split('');
+          // 获取名字字符
+          const nameChars = nameData.name.split('');
+          // 根据是否有姓氏决定显示内容
+          const displayChars = lastName ? [lastName, ...nameChars] : nameChars;
+          
           return (
             <div 
               key={index} 
@@ -191,13 +195,7 @@ function NameSearchContent() {
                 <div className="flex gap-8 flex-1">
                   {/* 字格列 */}
                   <div className="flex flex-col gap-[1.75rem]">
-                    <div onClick={(e) => {
-                      e.stopPropagation();
-                      handleCharacterClick(lastName);
-                    }}>
-                      <CharacterGrid char={lastName} />
-                    </div>
-                    {chars.map((char, idx) => (
+                    {displayChars.filter(char => char).map((char, idx) => (
                       <div 
                         key={idx}
                         onClick={(e) => {
@@ -212,20 +210,7 @@ function NameSearchContent() {
                   
                   {/* 信息列 */}
                   <div className="flex flex-col gap-[1.75rem] flex-1">
-                    {/* 姓氏信息 */}
-                    <div className="text-sm bg-gray-50 p-2.5 rounded h-16 flex items-center">
-                      <div className="grid grid-cols-[4rem,1fr] gap-1">
-                        <span className="text-gray-500">笔画：</span>
-                        <span>{characterInfos[lastName]?.strokes || ''}</span>
-                        <span className="text-gray-500">五行：</span>
-                        <span>{characterInfos[lastName]?.five_elements || ''}</span>
-                        <span className="text-gray-500">拼音：</span>
-                        <span>{characterInfos[lastName]?.pinyin || ''}</span>
-                      </div>
-                    </div>
-
-                    {/* 名字字符信息 */}
-                    {chars.map((char, idx) => (
+                    {displayChars.filter(char => char).map((char, idx) => (
                       <div key={idx} className="text-sm bg-gray-50 p-2.5 rounded h-16 flex items-center">
                         <div className="grid grid-cols-[4rem,1fr] gap-1">
                           <span className="text-gray-500">笔画：</span>
@@ -246,12 +231,12 @@ function NameSearchContent() {
                 </div>
               </div>
 
-              {/* 字义和取名参考 */}
+              {/* 字义和取名参考 - 只显示名字部分 */}
               <div className="mt-6 space-y-4 border-t pt-4">
                 {/* 字义说明 */}
                 <div className="text-sm">
                   <div className="font-medium mb-2 text-gray-900">字义解释</div>
-                  {chars.map((char, idx) => (
+                  {nameChars.map((char, idx) => (
                     <div key={idx} className="mb-2 text-gray-600">
                       <span className="inline-block bg-gray-100 px-2 py-0.5 rounded mr-2">『{char}』</span>
                       {characterInfos[char]?.meaning || ''}
@@ -262,7 +247,7 @@ function NameSearchContent() {
                 {/* 取名参考 */}
                 <div className="text-sm">
                   <div className="font-medium mb-2 text-gray-900">取名参考</div>
-                  {chars.map((char, idx) => (
+                  {nameChars.map((char, idx) => (
                     <div key={idx} className="mb-2 text-gray-600">
                       <span className="inline-block bg-gray-100 px-2 py-0.5 rounded mr-2">『{char}』</span>
                       {characterInfos[char]?.name_reference || ''}

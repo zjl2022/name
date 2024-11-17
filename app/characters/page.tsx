@@ -3,13 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+
 import { Input } from "@/components/ui/input";
 
 // 定义字符数据的接口
@@ -24,13 +18,6 @@ export default function CharactersList() {
   const [characters, setCharacters] = useState<Character[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
-  const [selectedChar, setSelectedChar] = useState('');
-  const [lastName, setLastName] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('lastName') || '';
-    }
-    return '';
-  });
   const [gender, setGender] = useState<'all' | 'male' | 'female'>('all');
   const [isLoading, setIsLoading] = useState(false);
   const pageSize = 100;
@@ -55,26 +42,8 @@ export default function CharactersList() {
     fetchCharacters();
   }, [currentPage, gender, pageSize]);
 
-  useEffect(() => {
-    if (lastName) {
-      localStorage.setItem('lastName', lastName);
-    }
-  }, [lastName]);
-
   const handleCharacterClick = (char: string) => {
-    if (lastName) {
-      router.push(`/names?lastName=${lastName}&containChar=${char}`);
-    } else {
-      setSelectedChar(char);
-    }
-  };
-
-  const handleSearch = () => {
-    if (!lastName) {
-      alert('请输入姓氏');
-      return;
-    }
-    router.push(`/names?lastName=${lastName}&containChar=${selectedChar}`);
+    router.push(`/names?containChar=${char}`);
   };
 
   const handleGenderChange = (newGender: 'all' | 'male' | 'female') => {
@@ -120,42 +89,18 @@ export default function CharactersList() {
       ) : (
         <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-2 md:gap-3 mb-8">
           {characters.map((char) => (
-            <Dialog key={char.character} open={selectedChar === char.character && !lastName}>
-              <DialogTrigger asChild>
-                <div 
-                  className={`aspect-square flex items-center justify-center border rounded-lg 
-                           hover:bg-gray-50 cursor-pointer text-base md:text-lg
-                           transition-colors duration-200
-                           ${gender === 'all' && !char.gender_preference ? 'text-blue-600' : 
-                             char.gender_preference === '男' ? 'text-blue-600' : 
-                             char.gender_preference === '女' ? 'text-pink-600' : ''}`}
-                  onClick={() => handleCharacterClick(char.character)}
-                >
-                  {char.character}
-                </div>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle className="text-center text-xl mb-4">
-                    选择姓氏以搜索包含『{char.character}』的名字
-                  </DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <Input
-                    placeholder="请输入姓氏"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    className="text-center text-lg"
-                  />
-                  <Button 
-                    className="w-full"
-                    onClick={handleSearch}
-                  >
-                    开始搜索
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+            <div 
+              key={char.character}
+              className={`aspect-square flex items-center justify-center border rounded-lg 
+                       hover:bg-gray-50 cursor-pointer text-base md:text-lg
+                       transition-colors duration-200
+                       ${gender === 'all' && !char.gender_preference ? 'text-blue-600' : 
+                         char.gender_preference === '男' ? 'text-blue-600' : 
+                         char.gender_preference === '女' ? 'text-pink-600' : ''}`}
+              onClick={() => handleCharacterClick(char.character)}
+            >
+              {char.character}
+            </div>
           ))}
         </div>
       )}
