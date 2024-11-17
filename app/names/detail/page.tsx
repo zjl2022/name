@@ -66,6 +66,15 @@ function NameDetailContent() {
     fetchNameDetail();
   }, [surname, name]);
 
+  // 添加内容清理函数
+  const cleanContent = (content: string) => {
+    return content
+      .replace(/\\n/g, '') // 移除 \n
+      .replace(/\n/g, '')  // 移除实际的换行符
+      .replace(/\s+/g, ' ') // 将多个空格替换为单个空格
+      .trim(); // 移除首尾空格
+  };
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -96,7 +105,9 @@ function NameDetailContent() {
         {/* 详情内容 */}
         <div 
           className="name-detail-content"
-          dangerouslySetInnerHTML={{ __html: detail.content }}
+          dangerouslySetInnerHTML={{ 
+            __html: detail ? cleanContent(detail.content) : '' 
+          }}
           onClick={(e) => {
             const target = e.target as HTMLElement;
             if (target.classList.contains('zi')) {

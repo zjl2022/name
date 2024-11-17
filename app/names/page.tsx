@@ -55,26 +55,20 @@ function NameSearchContent() {
 
         // 获取所有需要的汉字信息
         const chars = new Set([lastName, ...data.flatMap((n: NameData) => n.name.split(''))]);
-        const charInfos: Record<string, CharacterInfo> = {};
-        
-        console.log('需要获取信息的汉字:', [...chars]);
-        
-        for (const char of chars) {
-          if (char) {  // 确保字符不为空
-            const info = await fetchCharacterInfo(char);
-            if (info) {
-              console.log(`成功获取 "${char}" 的信息:`, info);
-              charInfos[char] = info;
-            } else {
-              console.log(`未能获取 "${char}" 的信息`);
-            }
+        const uniqueChars = [...chars].filter(Boolean); // 过滤掉空字符
+
+        if (uniqueChars.length > 0) {
+          const charResponse = await fetch(`/api/zi/info?characters=${uniqueChars.join(',')}`);
+          const { success, data: charData } = await charResponse.json();
+          
+          if (success) {
+            setCharacterInfos(charData);
+          } else {
+            console.error('获取汉字信息失败');
           }
         }
-
-        console.log('所有汉字信息:', charInfos);
-        setCharacterInfos(charInfos);
       } catch (error) {
-        console.error('获取名字失败:', error);
+        console.error('获取数据失败:', error);
       } finally {
         setLoading(false);
       }
@@ -82,26 +76,6 @@ function NameSearchContent() {
 
     fetchNames();
   }, [lastName, gender, containChar, page]); // 使用 page 替代 currentPage
-
-  // 获取字的信息
-  const fetchCharacterInfo = async (char: string) => {
-    try {
-      console.log('正在获取汉字信息:', char);
-      const response = await fetch(`/api/zi/info?character=${char}`);
-      const data = await response.json();
-      console.log('获取到的汉字信息:', data);
-      
-      if (!data.success) {
-        console.error('获取汉字信息失败:', data.message);
-        return null;
-      }
-      
-      return data.data;
-    } catch (error) {
-      console.error('获取汉字信息失败:', error);
-      return null;
-    }
-  };
 
   // 修改 CharacterGrid 组件
   const CharacterGrid = ({ char }: { char: string }) => (
@@ -177,7 +151,7 @@ function NameSearchContent() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl relative">
-      {/* 添加浮动切换按钮 */}
+      {/* 修改浮动切换按钮的位置和响应式样式 */}
       {gender && (
         <button
           onClick={() => {
@@ -186,13 +160,13 @@ function NameSearchContent() {
               lastName,
               gender: newGender,
               ...(containChar && { containChar }),
-              page: '1' // 切换性别时重置到第一页
+              page: '1'
             });
             router.push(`/names?${params.toString()}`);
           }}
-          className="fixed bottom-8 right-8 bg-white shadow-lg rounded-full px-6 py-3 
-            text-base font-medium hover:shadow-xl transition-shadow
-            border border-gray-200 flex items-center gap-2"
+          className="fixed bottom-32 right-4 md:bottom-16 md:right-8 bg-white shadow-lg rounded-full px-4 md:px-6 py-2 md:py-3 
+            text-sm md:text-base font-medium hover:shadow-xl transition-shadow
+            border border-gray-200 flex items-center gap-2 z-10"
         >
           <span>切换到</span>
           <span className={gender === 'male' ? 'text-pink-500' : 'text-blue-500'}>
