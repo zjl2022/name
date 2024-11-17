@@ -22,42 +22,20 @@ interface CharacterInfo {
 
 // 创建一个新的组件来包含使用 useSearchParams 的部分
 function NameSearchContent() {
-  const [names, setNames] = useState<NameData[]>([]);
-  const [characterInfos, setCharacterInfos] = useState<Record<string, CharacterInfo>>({});
-  const [loading, setLoading] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
   const searchParams = useSearchParams();
   const router = useRouter();
   
   const lastName = searchParams.get('lastName') || '';
   const gender = searchParams.get('gender') || '';
   const containChar = searchParams.get('containChar') || '';
+  // 从 URL 获取当前页码
+  const page = parseInt(searchParams.get('page') || '1');
+  
+  const [names, setNames] = useState<NameData[]>([]);
+  const [characterInfos, setCharacterInfos] = useState<Record<string, CharacterInfo>>({});
+  const [loading, setLoading] = useState(false);
 
-  // 使用 useEffect 监听 URL 参数变化
-  useEffect(() => {
-    // 当 lastName, gender, containChar 变化时，重置页码到第一页
-    setCurrentPage(1);
-  }, [lastName, gender, containChar]);
-
-  // 获取字的信息
-  const fetchCharacterInfo = async (char: string) => {
-    try {
-      console.log('正在获取汉字信息:', char);
-      const response = await fetch(`/api/zi/info?character=${char}`);
-      const data = await response.json();
-      console.log('获取到的汉字信息:', data);
-      
-      if (!data.success) {
-        console.error('获取汉字信息失败:', data.message);
-        return null;
-      }
-      
-      return data.data;
-    } catch (error) {
-      console.error('获取汉字信息失败:', error);
-      return null;
-    }
-  };
+  // 移除 currentPage 状态，直接使用 URL 中的 page
 
   useEffect(() => {
     const fetchNames = async () => {
@@ -67,7 +45,7 @@ function NameSearchContent() {
           lastName,
           ...(gender && { gender: gender === 'male' ? '男' : '女' }),
           ...(containChar && { containChar }),
-          page: currentPage.toString(),
+          page: page.toString(),
           pageSize: '9'
         });
 
@@ -103,7 +81,27 @@ function NameSearchContent() {
     };
 
     fetchNames();
-  }, [lastName, gender, containChar, currentPage]);
+  }, [lastName, gender, containChar, page]); // 使用 page 替代 currentPage
+
+  // 获取字的信息
+  const fetchCharacterInfo = async (char: string) => {
+    try {
+      console.log('正在获取汉字信息:', char);
+      const response = await fetch(`/api/zi/info?character=${char}`);
+      const data = await response.json();
+      console.log('获取到的汉字信息:', data);
+      
+      if (!data.success) {
+        console.error('获取汉字信息失败:', data.message);
+        return null;
+      }
+      
+      return data.data;
+    } catch (error) {
+      console.error('获取汉字信息失败:', error);
+      return null;
+    }
+  };
 
   // 修改 CharacterGrid 组件
   const CharacterGrid = ({ char }: { char: string }) => (
@@ -157,14 +155,10 @@ function NameSearchContent() {
     router.push(`/names?${params.toString()}`);
   };
 
-  // 修改分页按钮的处理函数，在 URL 中包含页码
+  // 修改分页按钮的处理函数
   const handlePageChange = (newPage: number) => {
-    const params = new URLSearchParams({
-      lastName,
-      ...(gender && { gender }),
-      ...(containChar && { containChar }),
-      page: newPage.toString()
-    });
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('page', newPage.toString());
     router.push(`/names?${params.toString()}`);
   };
 
@@ -311,16 +305,16 @@ function NameSearchContent() {
       <div className="mt-8 flex justify-center gap-4">
         <Button
           variant="outline"
-          onClick={() => handlePageChange(currentPage - 1)}
-          disabled={currentPage === 1}
+          onClick={() => handlePageChange(page - 1)}
+          disabled={page === 1}
           className="hover:bg-gray-100"
         >
           上一页
         </Button>
-        <span className="flex items-center px-4">第 {currentPage} 页</span>
+        <span className="flex items-center px-4">第 {page} 页</span>
         <Button
           variant="outline"
-          onClick={() => handlePageChange(currentPage + 1)}
+          onClick={() => handlePageChange(page + 1)}
           className="hover:bg-gray-100"
         >
           下一页
