@@ -45,9 +45,19 @@ export async function GET(request: Request) {
       }
     ).toArray();
 
-    // 使用定义的接口类型
+    // 转换数据库返回的文档为 CharacterInfo 类型
     const result = characterInfos.reduce((acc, info) => {
-      acc[info.character] = info;
+      // 确保数据符合 CharacterInfo 接口
+      const characterInfo: CharacterInfo = {
+        character: info.character,
+        strokes: info.strokes,
+        five_elements: info.five_elements,
+        pinyin: info.pinyin,
+        meaning: info.meaning,
+        name_reference: info.name_reference
+      };
+      
+      acc[characterInfo.character] = characterInfo;
       return acc;
     }, {} as Record<string, CharacterInfo>);
 
