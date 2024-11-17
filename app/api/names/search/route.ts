@@ -21,7 +21,6 @@ export async function GET(request: Request) {
     
     const page = parseInt(searchParams.get('page') || '1');
     const pageSize = parseInt(searchParams.get('pageSize') || '9');
-    const skip = (page - 1) * pageSize;
 
     await client.connect();
     const db = client.db(MONGODB_DB);
@@ -40,8 +39,7 @@ export async function GET(request: Request) {
 
     const pipeline = [
       { $match: matchStage },
-      { $sample: { size: pageSize } },
-      { $limit: pageSize }
+      { $sample: { size: pageSize } }
     ];
 
     const names = await collection
