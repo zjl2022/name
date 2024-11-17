@@ -23,25 +23,28 @@ function NameDetailContent() {
   // 处理点击单个字的事件
   const handleCharacterClick = (char: string) => {
     const params = new URLSearchParams({
-      lastName: surname,
       containChar: char,
       page: '1'
     });
+    if (surname) {
+      params.append('lastName', surname);
+    }
     router.push(`/names?${params.toString()}`);
   };
 
   useEffect(() => {
     const fetchNameDetail = async () => {
-      if (!surname || !name) return;
+      if (!name) return;
       
       setLoading(true);
       setError(null);
 
       try {
-        const params = new URLSearchParams({
-          surname,
-          name
-        });
+        const params = new URLSearchParams();
+        if (surname) {
+          params.append('surname', surname);
+        }
+        params.append('name', name);
         
         const response = await fetch(`/api/names/detail?${params.toString()}`);
         
