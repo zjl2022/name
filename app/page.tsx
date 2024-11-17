@@ -86,6 +86,14 @@ export default function Home() {
           >
             {isLoading ? '搜索中...' : '开始取名'}
           </Button>
+          
+          <Button 
+            variant="outline"
+            className="w-full h-11 text-lg border-gray-300"
+            onClick={() => router.push('/characters')}
+          >
+            查看所有汉字
+          </Button>
         </div>
       </div>
     </main>
