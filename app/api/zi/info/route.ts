@@ -4,6 +4,16 @@ import { MONGODB_URI, MONGODB_DB } from '@/lib/db';
 
 const client = new MongoClient(MONGODB_URI);
 
+// 添加接口定义
+interface CharacterInfo {
+  character: string;
+  strokes: number;
+  five_elements: string;
+  pinyin: string;
+  meaning: string;
+  name_reference: string;
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -35,11 +45,11 @@ export async function GET(request: Request) {
       }
     ).toArray();
 
-    // 转换为对象格式，方便前端使用
+    // 使用定义的接口类型
     const result = characterInfos.reduce((acc, info) => {
       acc[info.character] = info;
       return acc;
-    }, {} as Record<string, any>);
+    }, {} as Record<string, CharacterInfo>);
 
     return NextResponse.json({
       success: true,
